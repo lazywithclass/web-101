@@ -1,0 +1,28 @@
+{
+  "name": "web-101",
+  "version": "1.0.0",
+  "description": "A simple project done to help fellow recursers get into web development",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server-side/server.js",
+    "dev": "./node_modules/.bin/nodemon server-side/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lazywithclass/web-101.git"
+  },
+  "author": "me@lazywithclass.com",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/lazywithclass/web-101/issues"
+  },
+  "homepage": "https://github.com/lazywithclass/web-101#readme",
+  "dependencies": {
+    "body-parser": "^1.16.1",
+    "express": "^4.14.1",
+    "uuid": "^3.0.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.11.0"
+  }
+}
