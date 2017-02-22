@@ -4,6 +4,7 @@ const express = require('express'),
       uuidV4 = require('uuid/v4')
 
 app.use(bodyParser.json({ type: 'application/json' }))
+app.use(express.static('client-side'))
 
 let posts = {}
 
@@ -11,7 +12,7 @@ app.get('/api/posts', (req, res) => res.send(posts))
 
 app.post('/api/posts', (req, res) => {
   posts[uuidV4()] = req.body
-  res.status(201).send()
+  res.status(201).json({ status: 'ok' })
 })
 
 app.put('/api/posts/:id', (req, res) => {
@@ -19,7 +20,7 @@ app.put('/api/posts/:id', (req, res) => {
   if (!post) return res.send(404)
 
   posts[req.params.id] = req.body
-  res.status(200).send()
+  res.status(200).json({ status: 'ok' })
 })
 
 app.del('/api/posts/:id', (req, res) => {
