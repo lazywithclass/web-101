@@ -1,6 +1,7 @@
 let getAllPosts = () => {
   $.get('http://localhost:3000/api/posts', (posts) => {
     console.log(JSON.stringify(posts, null, '  '))
+    showGif('get')()
   })
 }
 
@@ -12,7 +13,7 @@ let createPost = () => {
       name: $('.js-create-post-form input:nth(0)').val(),
       description: $('.js-create-post-form input:nth(1)').val()
     }),
-    success: () => console.log('yay'),
+    success: showGif('create'),
     error: console.log,
     contentType: 'application/json',
     dataType: 'json'
@@ -27,7 +28,7 @@ let updatePost = () => {
     data: JSON.stringify({
       description: $('.js-update-post-form input:nth(1)').val()
     }),
-    success: () => console.log('yay'),
+    success: showGif('update'),
     error: console.log,
     contentType: 'application/json',
     dataType: 'json'
@@ -39,9 +40,30 @@ let deletePost = () => {
   $.ajax({
     type: 'DELETE',
     url: `http://localhost:3000/api/posts/${id}`,
-    success: () => console.log('yay'),
+    success: showGif('delete'),
     error: console.log
   });
+}
+
+let showGif = (operation) => () => {
+  const gifs = {
+    delete: 'https://media0.giphy.com/media/26gYPjuK6O0H63GyQ/giphy.gif',
+    update: 'https://media3.giphy.com/media/wFbI8gwCfCxeo/giphy.gif',
+    create: 'https://media4.giphy.com/media/UqRjmjfhkVxEQ/giphy.gif',
+    get: 'https://media0.giphy.com/media/3o7TKqGAZAbdKoaxu8/giphy.gif'
+  }
+  const body = $('body').html()
+  setTimeout(function() {
+    $('img')
+      .attr('src', gifs[operation]);
+  }, 0);
+  $('body').html('<img style="position: absolute; display: none;" />')
+  $('img').show()
+  setTimeout(() => $('body').html(body), 2000)
+}
+
+let emergency = () => {
+  $('body').html('<img style="position: absolute;" src="https://media4.giphy.com/media/XesbluNw5YMPS/giphy.gif" />')
 }
 
 $(() => {
@@ -51,4 +73,6 @@ $(() => {
   $('.js-create-post').click(createPost)
   $('.js-update-post').click(updatePost)
   $('.js-delete-post').click(deletePost)
+
+  setTimeout(() => $('.js-emergency').show(), 120000)
 })
