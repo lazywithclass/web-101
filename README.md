@@ -118,3 +118,7 @@ Of course this could change a lot in terms of how to choose the endpoints, like
 
 but the principle remains the same, you apply a verb to a resource to create 
 contents.
+
+Note that POST calls are usually implemented as not idempotent, this could lead 
+to inconsistencies when, for example, networking errors happen between the client
+and the server, while a call is being made.
