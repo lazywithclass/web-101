@@ -70,6 +70,4 @@ Get yourself familiar with the flow:
  * choose a name and a description, then click the button to create a post now 
  you will have a post in your server data structure
 
-*********
-How would you find out how many posts you have in the server?
-*********
+** How would you find out how many posts you have in the server? **
