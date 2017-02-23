@@ -66,6 +66,17 @@ let emergency = () => {
   $('body').html('<img style="position: absolute;" src="https://media4.giphy.com/media/XesbluNw5YMPS/giphy.gif" />')
 }
 
+let random = () => {
+  const top = Math.floor(Math.random() * 400);
+  const left = Math.floor(Math.random() * 400);
+  const url = 'http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=rick+and+morty'
+  $.get(url, (image) => {
+    $('#random-gif').attr('src', image.data.image_url).css({top: top + 'px', left: left + 'px'});
+    $('#random-gif').show()
+    setTimeout(() => $('#random-gif').hide(), 4000)
+  })
+}
+
 $(() => {
   console.log('oh hai!')
 

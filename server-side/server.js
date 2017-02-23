@@ -1,34 +1,14 @@
 const express = require('express'),
       app = express(),
       bodyParser = require('body-parser'),
-      uuidV4 = require('uuid/v4')
+      routes = require('./routes')
 
 app.use(bodyParser.json({ type: 'application/json' }))
 app.use(express.static('client-side'))
 
-let posts = {}
-
-app.get('/api/posts', (req, res) => res.send(posts))
-
-app.post('/api/posts', (req, res) => {
-  posts[uuidV4()] = req.body
-  res.status(201).json({ status: 'ok' })
-})
-
-app.put('/api/posts/:id', (req, res) => {
-  let post = posts[req.params.id]
-  if (!post) return res.send(404)
-
-  posts[req.params.id] = req.body
-  res.status(200).json({ status: 'ok' })
-})
-
-app.del('/api/posts/:id', (req, res) => {
-  let post = posts[req.params.id]
-  if (!post) return res.send(404)
-
-  delete posts[req.params.id]
-  res.status(200).send()
-})
+app.get('/api/posts', routes.get)
+app.post('/api/posts', routes.create)
+app.put('/api/posts/:id', routes.update)
+app.del('/api/posts/:id', routes.del)
 
 app.listen(3000, () => console.log('listening'))
