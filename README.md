@@ -17,6 +17,16 @@ any doubts or questions feel free to open an issue.
 
 ### How to use this
 
+You will need `node` and `npm` installed on your computer. 
+
+#### Installing 
+
+Open a console and 
+
+```bash
+$ npm install
+```
+
 #### Starting the server
 
 Open a console and 
