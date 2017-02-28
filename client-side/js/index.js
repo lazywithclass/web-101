@@ -1,89 +1,182 @@
+// Initialize an App variable to store the app's posts
+let App = {
+  posts: []
+}
+
+// Fetch all the posts from the server
 let getAllPosts = () => {
+  showSpinner()
   $.get('http://localhost:3000/api/posts', (posts) => {
-    console.log(JSON.stringify(posts, null, '  '))
-    showGif('get')()
+    App.posts = posts
+    refreshTable()
+    hideSpinner()
   })
 }
 
+// Toggle spinner visibility
+let showSpinner = () => $('.js-loading-sign').removeClass('hide')
+let hideSpinner = () => $('.js-loading-sign').addClass('hide')
+
+// Render a table row for a posts (Check the usage of ES6 template strings!)
+let renderRow = (post) => {
+  return `
+    <tr id="post-${post.id}">
+      <td>${post.id}</td>
+      <td>${post.name}</td>
+      <td>${post.description}</td>
+      <td>
+        <button
+          type="button"
+          class="btn btn-xs btn-success js-edit-post"
+          data-id="${post.id}">
+          <span class="glyphicon glyphicon glyphicon-pencil"></span>
+        </button>
+        <button
+          type="button"
+          class="btn btn-xs btn-danger js-delete-post"
+          data-id="${post.id}">
+          <span class="glyphicon glyphicon glyphicon-trash"></span>
+        </button>
+      </td>
+    </tr>
+  `
+}
+
+// Render the table from scratch
+let refreshTable = () => {
+  let tableBody = $('table.js-posts-table tbody')
+  let html = ''
+
+  for (key in App.posts) {
+    post = App.posts[key]
+    html += renderRow(post)
+  }
+
+  tableBody.html(html)
+}
+
+// Remove an specific row from the table
+let removePost = (id) => {
+  let row = $(`table.js-posts-table tbody #post-${id}`)
+  row.fadeOut(750, () => row.remove())
+}
+
+// Store a post on the server
 let createPost = () => {
+  showSpinner()
+
+  let form = $('.js-create-post-form')
+  let formElement = form[0]
+
+  post = {
+    name: $('input:nth(0)', form).val(),
+    description: $('input:nth(1)', form).val()
+  }
+
   $.ajax({
     type: 'POST',
     url: 'http://localhost:3000/api/posts',
-    data: JSON.stringify({
-      name: $('.js-create-post-form input:nth(0)').val(),
-      description: $('.js-create-post-form input:nth(1)').val()
-    }),
-    success: showGif('create'),
+    data: JSON.stringify(post),
+    success: (data, textStatus, jqXHR) => {
+      post.id = jqXHR.getResponseHeader('Location').split('/').pop() // Fancy way to get the post id from the Location header
+      App.posts.push(post)
+      refreshTable()
+      hideSpinner()
+      formElement.reset()
+    },
     error: console.log,
     contentType: 'application/json',
     dataType: 'json'
   });
 }
 
+// Load a post into the edit post form
+let editPost = (id) => {
+  let post = App.posts.filter((post) => post.id == id)[0]
+  let form = $('.js-update-post-form')
+
+  $('input[name=id]', form).val(post.id)
+  $('input[name=name]', form).val(post.name)
+  $('input[name=description]', form).val(post.description)
+
+  scrollTo(form)
+}
+
+// Store the edited post in the server
 let updatePost = () => {
+  showSpinner()
+
   const id = $('.js-update-post-form input:nth(0)').val()
+  let post = App.posts.filter((post) => post.id == id)[0]
+  let formElement = $('.js-update-post-form')[0]
+
+  post.name = $('.js-update-post-form input:nth(1)').val()
+  post.description = $('.js-update-post-form input:nth(2)').val()
+
   $.ajax({
     type: 'PUT',
     url: `http://localhost:3000/api/posts/${id}`,
     data: JSON.stringify({
-      description: $('.js-update-post-form input:nth(1)').val()
+      name: post.name,
+      description: post.description,
     }),
-    success: showGif('update'),
+    success: function () {
+      formElement.reset()
+      hideSpinner()
+      refreshTable()
+    },
     error: console.log,
     contentType: 'application/json',
     dataType: 'json'
   });
 }
 
-let deletePost = () => {
-  const id = $('.js-delete-post-form input:nth(0)').val()
+// Delete a post from server and update table
+let deletePost = (id) => {
   $.ajax({
     type: 'DELETE',
     url: `http://localhost:3000/api/posts/${id}`,
-    success: showGif('delete'),
+    success: removePost(id),
     error: console.log
   });
 }
 
-let showGif = (operation) => () => {
-  const gifs = {
-    delete: 'https://media0.giphy.com/media/26gYPjuK6O0H63GyQ/giphy.gif',
-    update: 'https://media3.giphy.com/media/wFbI8gwCfCxeo/giphy.gif',
-    create: 'https://media4.giphy.com/media/UqRjmjfhkVxEQ/giphy.gif',
-    get: 'https://media0.giphy.com/media/3o7TKqGAZAbdKoaxu8/giphy.gif'
-  }
-  const body = $('body').html()
-  setTimeout(function() {
-    $('img')
-      .attr('src', gifs[operation]);
-  }, 0);
-  $('body').html('<img style="position: absolute; display: none;" />')
-  $('img').show()
-  setTimeout(() => $('body').html(body), 2000)
-}
-
-let emergency = () => {
-  $('body').html('<img style="position: absolute;" src="https://media4.giphy.com/media/XesbluNw5YMPS/giphy.gif" />')
-}
-
-let random = () => {
-  const top = Math.floor(Math.random() * 400);
-  const left = Math.floor(Math.random() * 400);
-  const url = 'http://api.giphy.com/v1/gifs/random?api_key=dc6zaTOxFJmzC&tag=rick+and+morty'
-  $.get(url, (image) => {
-    $('#random-gif').attr('src', image.data.image_url).css({top: top + 'px', left: left + 'px'});
-    $('#random-gif').show()
-    setTimeout(() => $('#random-gif').hide(), 4000)
-  })
+// Scroll window to an element
+let scrollTo = (element) => {
+  $('html, body').animate({
+    scrollTop: element.offset().top
+  }, 300);
 }
 
 $(() => {
-  console.log('oh hai!')
+  // Bind all the events
+  $('.js-get-posts').click((event) => {
+    event.preventDefault()
+    getAllPosts()
+  })
 
-  $('.js-get-posts').click(getAllPosts)
-  $('.js-create-post').click(createPost)
-  $('.js-update-post').click(updatePost)
-  $('.js-delete-post').click(deletePost)
+  $('.js-create-post-form').submit((event) => {
+    event.preventDefault()
+    createPost()
+  })
 
-  setTimeout(() => $('.js-emergency').show(), 120000)
+  $('.js-update-post-form').submit((event) => {
+    event.preventDefault()
+    updatePost()
+  })
+
+  $(document).on('click', '.js-delete-post', (event) => {
+    event.preventDefault()
+    let id = $(event.currentTarget).data('id')
+    deletePost(id)
+  })
+
+  $(document).on('click', '.js-edit-post', (event) => {
+    event.preventDefault()
+    let id = $(event.currentTarget).data('id')
+    editPost(id)
+  })
+
+  // Initialize table with data
+  getAllPosts()
 })
