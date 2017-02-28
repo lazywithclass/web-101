@@ -26,7 +26,9 @@ routes.create = (req, res) => {
     description: req.body.description,
   })
 
-  res.status(201).json({ status: 'ok' })
+  location = req.protocol + '://' + req.get('host') + '/api/posts/' + id;
+
+  res.status(201).location(location).json({ status: 'ok' })
 }
 
 routes.update = (req, res) => {
